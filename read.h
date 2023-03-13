@@ -35,7 +35,7 @@ int read( Token *token){
 	int x, i=0;
 	if( ~( x = fgetc(fin) ) ){
 		switch( getType(x) ){
-		case seperator:
+		case separator:
 			break;
 		case int_num:
 			token[0].type = int_num;
@@ -51,9 +51,11 @@ int read( Token *token){
 			return 0;
 		}
 	}
+	tokenType type;
 	while( ~( x = fgetc(fin) ) ){
-		switch( getType(x) ){
-		case seperator:
+		switch( type = getType(x) ){
+		case separator:
+			while( type = getType( x = fgetc(fin) ) == separator );
 			break;
 		case float_num:
 			switch( token[i].type ){
@@ -62,29 +64,47 @@ int read( Token *token){
 			case float_num:
 				exit(1);
 			case operator:
-				token[++i].type = operator;
+				token[++i].type  = operator;
 				token[i].operand = 0;
 			}
 			token[i].type = float_num;
 			token[i].floatpower = 0;
+			continue;
 		case int_num:
 			switch( token[i].type ){
 			case float_num:
 				token[i].floatpower++;
 			case int_num:
 				token[i].operand *= 10;
-				token[i].operand += x ;
+				token[i].operand += x - '0';
 				continue;
 			case operator:
 				token[++i].type = int_num;
 			}
 			continue;
 		case operator:
-			token[++i].type = operator;
-			token[i].operand = x;
+			token[++i].type 	= operator;
+			token[i].operand 	= x;
 			continue;
 		case query:
-			return i+1;
+			return i;
+		}
+		switch( type ){
+		case float_num:
+			token[++i].type 	= float_num;
+			token[i].operand 	= 0;
+			token[i].floatpower = 0;
+			break;
+		case int_num:
+			token[++i].type 	= int_num;
+			token[i].operand 	= x - '0';
+			break;
+		case operator:
+			token[++i].type 	= operator;
+			token[i].operand 	= x;
+			break;
+		case query:
+			return i;
 		}
 	}
 }

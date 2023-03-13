@@ -37,6 +37,7 @@ int help( char command ){
 
 int help( char *str, char* command ){
 	printf( str, command );
+	help();
 	return 0;
 }
 
